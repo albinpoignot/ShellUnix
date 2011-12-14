@@ -25,5 +25,6 @@ int main( int argc, const char* argv[] )
   strcpy( cmd->initial_cmd, tampon ) ;                      //Copie du tampon dans la chaine allouée
   strcpy( cmd->membres_cmd[0], cmd->initial_cmd );
   
-  parse_args( cmd );                                        
+  parse_args( cmd );
+  aff_args( cmd );
 }
