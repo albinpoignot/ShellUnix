@@ -12,4 +12,12 @@ typedef struct
   int **type_redir; // Stocke le sens des redirections
 } cmd;
 
+void aff_args( cmd* c ); // ToDo
+void free_args( cmd* c ); // ToDo
 void parse_args( cmd* c );
+void parse_membres( char* chaine, cmd* ma_cmd ); // ToDo
+void aff_membres( cmd* ma_cmd ); // ToDo
+void free_membres( cmd* ma_cmd ); // ToDo
+int parse_redir( unsigned int i, cmd* c ); // ToDo
+void free_redir( cmd* c );
+void aff_redir( cmd c, int i ); // ToDo
