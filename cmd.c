@@ -9,12 +9,12 @@ void aff_args( cmd* c )
   int i, j;
 
   // Parcours des membres
-  for(i=0; i <= cmd->nb_membres; i++ )
+  for(i=0; i <= c->nb_membres; i++ )
   {
     // Parcours des args
-    for(j=0; j <= cmd->nb_args_membres[i]; j++)
+    for(j=0; j <= c->nb_args_membres[i]; j++)
     {
-      printf("%d\n", cmd->cmd_args[i][j]);
+      printf("%s\n", c->cmd_args[i][j]);
     }
   }
   
@@ -30,12 +30,12 @@ void free_args( cmd* c )
   int i, j;
 
   // Parcours des membres
-  for(i=0; i <= cmd->nb_membres; i++ )
+  for(i=0; i <= c->nb_membres; i++ )
   {
     // Parcours des args
-    for(j=0; j <= cmd->nb_args_membres[i]; j++)
+    for(j=0; j <= c->nb_args_membres[i]; j++)
     {
-      free(cmd->cmd_args[i][j]);
+      free(c->cmd_args[i][j]);
     }
   }
   
