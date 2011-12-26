@@ -69,7 +69,7 @@ void parse_args( cmd * c )
 	c->cmd_args[i] = (char**)realloc( c->cmd_args[i], j * sizeof( char* ) );
       }
     }
-    c->nb_args_membres[i] = j+1;
+    c->nb_args_membres[i] = j;
     
   }
 
