@@ -9,10 +9,10 @@ void aff_args( cmd* c )
   int i, j;
 
   // Parcours des membres
-  for(i=0; i <= c->nb_membres; i++ )
+  for( i=0; i < c->nb_membres; i++ )
   {
     // Parcours des args
-    for(j=0; j <= c->nb_args_membres[i]; j++)
+    for( j=0; j < c->nb_args_membres[i]; j++ )
     {
       printf("%s\n", c->cmd_args[i][j]);
     }
@@ -30,10 +30,10 @@ void free_args( cmd* c )
   int i, j;
 
   // Parcours des membres
-  for(i=0; i <= c->nb_membres; i++ )
+  for(i=0; i < c->nb_membres; i++ )
   {
     // Parcours des args
-    for(j=0; j <= c->nb_args_membres[i]; j++)
+    for(j=0; j < c->nb_args_membres[i]; j++)
     {
       free(c->cmd_args[i][j]);
     }
@@ -65,9 +65,10 @@ void parse_args( cmd * c )
 	c->cmd_args[i][j] = (char*)malloc( 250 * sizeof( char ) );
 	strcpy( c->cmd_args[i][j], pch );
       
-	printf ("%s\n",pch);
-	pch = strtok (NULL, " ");
-	j++;
+      //printf ("%s\n",pch);
+      pch = strtok (NULL, " ");
+      j++;
+
       
 	if( pch != NULL )
 	{
@@ -80,6 +81,7 @@ void parse_args( cmd * c )
       }
     }
     c->nb_args_membres[i] = j;
+
     free( copie );
   }
 
