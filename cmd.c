@@ -1,9 +1,38 @@
 #include "cmd.h"
 
 /**
+ * Affiche les membres 
+ */
+void aff_membres( Cmd* c )
+{
+  int i;
+
+  // Parcours des membres
+  for( i=0; i < c->nb_membres; i++ )
+  {
+    printf("membres_cmd[%d] = %s\n", i, c->membres_cmd[i]);
+  }
+}
+
+
+/**
+ * Affiche les redirections
+ */
+void aff_redir( Cmd* c, unsigned int i )
+{
+     printf(" redir[%d][STDIN] = %s\n",i, c->redir[i][0] );
+     printf(" redir[%d][STDOUT] = %s\n",i, c->redir[i][1] );
+     printf(" redir[%d][STDERR] = %s\n", i, c->redir[i][2] );
+     
+     printf(" type_redir[%d][STDIN] = %d\n",i, c->type_redir[i][0] );
+     printf(" type_redir[%d][STDOUT] = %d\n",i, c->type_redir[i][1] );
+     printf(" type_redir[%d][STDERR] = %d\n",i, c->type_redir[i][2] );
+}
+
+/**
  * Affiche les arguments de chacun des membres
  */
-void aff_args( cmd* c )
+void aff_args( Cmd* c )
 {
   
   int i, j;
@@ -14,7 +43,7 @@ void aff_args( cmd* c )
     // Parcours des args
     for( j=0; j < c->nb_args_membres[i]; j++ )
     {
-      printf("%s\n", c->cmd_args[i][j]);
+      printf("cmd_args[%d][%d]= %s\n", i, j, c->cmd_args[i][j]);
     }
   }
   
@@ -24,7 +53,7 @@ void aff_args( cmd* c )
 /**
  * Désalloue l'espace allouée pour les arguments
  */
-void free_args( cmd* c )
+void free_args( Cmd* c )
 {
   
   int i, j;
@@ -41,7 +70,7 @@ void free_args( cmd* c )
   
 }
 
-void parse_args( cmd * c )
+void parse_args( Cmd * c )
 {
   char * pch;
   int i;
@@ -51,28 +80,26 @@ void parse_args( cmd * c )
   for( i = 0; i < c->nb_membres; i++ )
   {
     int j = 0;
-    
-    char* copie = (char*)malloc( strlen( (c->membres_cmd[i] )+1) * sizeof( char ) );
+
+    char* copie = (char*)malloc( (strlen(c->membres_cmd[i])+1) * sizeof( char ) );
     strcpy( copie, c->membres_cmd[i] );
-    
+  
     c->cmd_args[i] = (char**)malloc( 1 * sizeof( char* ) );
     pch = strtok ( copie," ");
-    
+  
     while (pch != NULL )
     {
-      if( strcmp( pch, ">") != 0 && strcmp( pch, "<") != 0 && strcmp( pch, ">>") != 0)  // on analyse pas si redirection cela sera fait dans            parse redirection
+      if( strcmp( pch, ">") != 0 && strcmp( pch, "<") != 0 && strcmp( pch, ">>") != 0 && strcmp( pch, "2>>") != 0 && strcmp( pch, "2>") != 0 )  // on analyse pas si redirection cela sera fait dans            parse redirection
       {
-	c->cmd_args[i][j] = (char*)malloc( 250 * sizeof( char ) );
+	c->cmd_args[i][j] = (char*)malloc( (strlen( pch) + 1 ) * sizeof( char ) );
 	strcpy( c->cmd_args[i][j], pch );
-      
-      //printf ("%s\n",pch);
-      pch = strtok (NULL, " ");
-      j++;
-
-      
+     
+	pch = strtok (NULL, " ");
+	j++;
+  
 	if( pch != NULL )
 	{
-	  c->cmd_args[i] = (char**)realloc( c->cmd_args[i], j * sizeof( char* ) );
+	  c->cmd_args[i] = (char**)realloc( c->cmd_args[i], (j+1) * sizeof( char* ) );
 	}
       }
       else
@@ -81,32 +108,34 @@ void parse_args( cmd * c )
       }
     }
     c->nb_args_membres[i] = j;
-
     free( copie );
   }
 
 }
 
-void parse_membres( char* chaine, cmd* cmd )  // Attention la fonction detruit l'argument chaine
+void parse_membres( char* chaine, Cmd* cmd )  // Attention la fonction detruit l'argument chaine
 {
     char* pch;
-    unsigned int i = 0;
+    int i = 0;
     
-    cmd->initial_cmd = (char*)malloc( strlen(chaine) * sizeof( char ) ); //Allocation de la chaine initial_cmd de la structure CMD
+    cmd->initial_cmd = (char*)malloc( (strlen(chaine)+1) * sizeof( char ) ); //Allocation de la chaine initial_cmd de la structure CMD    
     strcpy( cmd->initial_cmd, chaine ) ;                                 //Copie de la commande initial dans la structure
    
     pch = strtok ( chaine, "|" );
+
+    cmd->membres_cmd = (char**)malloc( sizeof( char* )) ;
     
     while (pch != NULL)
     {
 	i++;
-	cmd->membres_cmd = realloc( cmd->membres_cmd, i * sizeof( char* ));
-	cmd->membres_cmd[i-1] = (char*)malloc( strlen( pch ) * sizeof( char ));
+
+	cmd->membres_cmd = (char**)realloc( cmd->membres_cmd, i * sizeof( char* ));
+	cmd->membres_cmd[i-1] = (char*)malloc( (strlen( pch )+1) * sizeof( char ));
 	strcpy( cmd->membres_cmd[i-1], pch );
 	
 	pch = strtok ( NULL, "|" );
     }
-    
+ 
     cmd->nb_membres = i;
     cmd->nb_args_membres = (int*)malloc( cmd->nb_membres * sizeof( int ) );  // initialisation du tableau d'entier nb_args_membres
     
@@ -117,9 +146,9 @@ void parse_membres( char* chaine, cmd* cmd )  // Attention la fonction detruit l
     {
 	cmd->redir[i] = (char**)malloc( 3 * sizeof( char* ) );
 	
-	cmd->redir[i][STDIN] = (char*)malloc( 250 * sizeof( char ) );
-	cmd->redir[i][STDOUT] = (char*)malloc( 250 * sizeof( char ) );
-	cmd->redir[i][STDERR] = (char*)malloc( 250 * sizeof( char ) );
+	cmd->redir[i][STDIN] = (char*)malloc( 100 * sizeof( char ) );
+	cmd->redir[i][STDOUT] = (char*)malloc( 100 * sizeof( char ) );
+	cmd->redir[i][STDERR] = (char*)malloc( 100 * sizeof( char ) );
 	
 	cmd->type_redir[i] = (int*)malloc( 3 * sizeof( int ));
 	
@@ -129,34 +158,46 @@ void parse_membres( char* chaine, cmd* cmd )  // Attention la fonction detruit l
     }
 }
 
-int parse_redir( unsigned int i, cmd* cmd )
+int parse_redir( unsigned int i, Cmd* cmd )
 {
     char* pch = NULL; 
     int cas = 0;
   
-    char* copie = (char*)malloc( strlen( (cmd->membres_cmd[i] )+1) * sizeof( char ) );
+    char* copie = (char*)malloc( (strlen(cmd->membres_cmd[i])+1) * sizeof( char ) );
     strcpy( copie, cmd->membres_cmd[i] );
     
     pch = strtok( copie, " " );
     
-    while( pch != NULL ) // au besin mettre un NULL ou valeur special dans les autres case de la redirection
+    while( pch != NULL ) // au besoin mettre une valeur special dans les autres case de la redirection
     {
       if( cas == 1)
       {
 	strcpy( cmd->redir[i][STDOUT], pch );
-	printf( "Redirection sortie standard .%s.\n", cmd->redir[i][STDOUT] );
+	//printf( "Redirection sortie standard .%s.\n", cmd->redir[i][STDOUT] );
       }
       else if( cas == 2 )
       {
 	strcpy( cmd->redir[i][STDIN], pch );
-	printf( "Redirection entrée standard .%s.\n", cmd->redir[i][STDIN] );
+	//printf( "Redirection entrée standard .%s.\n", cmd->redir[i][STDIN] );
       }
       else if( cas == 3 )
       {
 	strcpy( cmd->redir[i][STDOUT], pch );
 	cmd->type_redir[i][STDOUT] = RAPPEND;
-	printf( "Redirection et append sortie standard .%s.\n", cmd->redir[i][STDOUT] );
-	printf( "%d\n", cmd->type_redir[i][STDOUT] );
+	//printf( "Redirection et append sortie standard .%s.\n", cmd->redir[i][STDOUT] );
+	//printf( "%d\n", cmd->type_redir[i][STDOUT] );
+      }
+      else if( cas == 4 )
+      {
+	strcpy( cmd->redir[i][STDERR], pch );
+	//printf( "Redirection erreur standard .%s.\n", cmd->redir[i][STDERR] );
+      }
+      else if( cas == 5 )
+      {
+	strcpy( cmd->redir[i][STDERR], pch );
+	cmd->type_redir[i][STDERR] = RAPPEND;
+	//printf( "Redirection et append erreur standard .%s.\n", cmd->redir[i][STDERR] );
+	//printf( "%d\n", cmd->type_redir[i][STDERR] );
       }
       
       if( strcmp( pch, ">") == 0 )
@@ -171,12 +212,19 @@ int parse_redir( unsigned int i, cmd* cmd )
       {
 	 cas = 3;
       }
+      else if( strcmp( pch, "2>") == 0 )
+      {
+	 cas = 4;
+      }
+      else if( strcmp( pch, "2>>") == 0 )
+      {
+	  cas = 5;
+      }
       
       pch = strtok( NULL, " " );
       
     }
     
-    free( copie );
 }
 
 

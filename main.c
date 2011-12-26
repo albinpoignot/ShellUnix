@@ -11,7 +11,7 @@ int main( int argc, const char* argv[] )
   {*/
     char* commande; 
     int i = 0;
-    cmd* cmd = malloc( 1 * sizeof( cmd ) );
+    Cmd* cmd = (Cmd*)malloc( 1 * sizeof( Cmd ) );
     
     commande = readline( "Veuillez entrer votre commande\n" );
 
@@ -23,7 +23,14 @@ int main( int argc, const char* argv[] )
       parse_redir( i, cmd );
     }
     
-    free( commande );
+    aff_membres( cmd );
+    aff_args( cmd );
+    
+    for( i = 0; i < cmd->nb_membres; i++ )
+    {
+      aff_redir( cmd, i );
+    }
+    
     //free cmd and co
     //flush le clavier
   //}                                      

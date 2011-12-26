@@ -14,14 +14,15 @@ typedef struct
   unsigned int *nb_args_membres; // Nombre d'argements par membre
   char ***redir; // Stocke les chemins vers les fichiers de redirection
   int **type_redir; // Stocke le sens des redirections
-} cmd;
+  
+} Cmd;
 
-void aff_args( cmd* c ); // ToDo
-void free_args( cmd* c ); // ToDo
-void parse_args( cmd* c );
-void parse_membres( char* chaine, cmd* ma_cmd ); 
-void aff_membres( cmd* ma_cmd ); // ToDo
-void free_membres( cmd* ma_cmd ); // ToDo
-int parse_redir( unsigned int i, cmd* cmd ); 
-void free_redir( cmd* c );
-void aff_redir( cmd c, int i ); // ToDo
+void aff_args( Cmd* c ); // ToDo
+void free_args( Cmd* c ); // ToDo
+void parse_args( Cmd* c );
+void parse_membres( char* chaine, Cmd* ma_cmd ); 
+void aff_membres( Cmd* ma_cmd ); // ToDo
+void free_membres( Cmd* ma_cmd ); // ToDo
+int parse_redir( unsigned int i, Cmd* cmd ); 
+void free_redir( Cmd* c );
+void aff_redir( Cmd *c, unsigned int i ); // ToDo
