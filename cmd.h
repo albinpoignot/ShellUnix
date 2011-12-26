@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+enum{ STDIN = 0, STDOUT = 1, STDERR = 2 };
+enum{ RAPPEND = 3 };
+
 typedef struct 
 {
   char *initial_cmd; // Chaine initiale tapee par l'utilisateur
@@ -16,9 +19,9 @@ typedef struct
 void aff_args( cmd* c ); // ToDo
 void free_args( cmd* c ); // ToDo
 void parse_args( cmd* c );
-void parse_membres( char* chaine, cmd* ma_cmd ); // ToDo
+void parse_membres( char* chaine, cmd* ma_cmd ); 
 void aff_membres( cmd* ma_cmd ); // ToDo
 void free_membres( cmd* ma_cmd ); // ToDo
-int parse_redir( unsigned int i, cmd* c ); // ToDo
+int parse_redir( unsigned int i, cmd* cmd ); 
 void free_redir( cmd* c );
 void aff_redir( cmd c, int i ); // ToDo

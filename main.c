@@ -1,29 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "cmd.h"
 
 int main( int argc, const char* argv[] )
 {
-  while(1)
-  {
-    char commande[500];
-    
+  /*while(1)
+  {*/
+    char* commande; 
+    int i = 0;
     cmd* cmd = malloc( 1 * sizeof( cmd ) );
-    cmd->nb_membres = 1;
-    cmd->membres_cmd = (char**)malloc( cmd->nb_membres * sizeof( char* ) );
-    cmd->membres_cmd[0] = (char*) malloc( 250 * sizeof( char ) );
-    cmd->nb_args_membres = (int*)malloc( cmd->nb_membres * sizeof( int ) );
     
-    printf("Veuillez entrer votre commande\n");
-    scanf( "%s", commande );
-    
-    cmd->initial_cmd = (char*)malloc( 1 * sizeof( commande ) ); //Allocation de la chaine initial_cmd de la structure CMD
-    strcpy( cmd->initial_cmd, commande ) ;                      //Copie du tampon dans la chaine allouée
-    strcpy( cmd->membres_cmd[0], cmd->initial_cmd );
-  
+    commande = readline( "Veuillez entrer votre commande\n" );
+
+    parse_membres( commande, cmd );
     parse_args( cmd ); 
     
+    for( i = 0; i < cmd->nb_membres; i++ )
+    {
+      parse_redir( i, cmd );
+    }
+    
+    free( commande );
     //free cmd and co
-  }                                      
+    //flush le clavier
+  //}                                      
 }
