@@ -23,15 +23,22 @@ int main( int argc, const char* argv[] )
       parse_redir( i, cmd );
     }
     
-    aff_membres( cmd );
+    exec_cmd( cmd );
+    
+    /*aff_membres( cmd );
     aff_args( cmd );
     
     for( i = 0; i < cmd->nb_membres; i++ )
     {
       aff_redir( cmd, i );
-    }
+    }*/
     
-    //free cmd and co
-    //flush le clavier
+    free_redir( cmd );
+    free_args( cmd );
+    free_membres( cmd );
+    
+    free( commande );
+    free( cmd );
+    
   //}                                      
 }

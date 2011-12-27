@@ -16,7 +16,7 @@ void aff_membres( Cmd* c )
 
 
 /**
- * Affiche les redirections
+ * Affiche les redirections pour le membre i
  */
 void aff_redir( Cmd* c, unsigned int i )
 {
@@ -54,6 +54,37 @@ void aff_args( Cmd* c )
   
 }
 
+/**
+ * Desalloue l'espace utilisé par les redirections
+ */
+void free_redir( Cmd* cmd )
+{
+    int i;
+    
+    for( i = 0; i < cmd->nb_membres; i++ )
+    {
+	free( cmd->redir[i] );
+	free( cmd->type_redir[i] );
+    }
+
+    free( cmd->redir );
+    free( cmd->type_redir );
+}
+
+/**
+ * Desalloue l'espace utilisé par les membres
+ */
+void free_membres( Cmd* cmd )
+{
+    int i;
+    free( cmd->initial_cmd );
+   
+    for( i = 0; i < cmd->nb_membres; i++ )
+    {
+	free( cmd->membres_cmd[i] );
+    }
+    free( cmd->membres_cmd );
+}
 
 /**
  * Désalloue l'espace allouée pour les arguments
@@ -71,10 +102,15 @@ void free_args( Cmd* c )
     {
       free(c->cmd_args[i][j]);
     }
+    free( c->cmd_args[i] );
   }
-  
+  free( c->cmd_args );  
+  free( c->nb_args_membres );
 }
 
+/**
+ * Decoupage des membres en arguments, on ignore les redirections ici
+ */
 void parse_args( Cmd * c )
 {
   char * pch;
@@ -119,6 +155,9 @@ void parse_args( Cmd * c )
 
 }
 
+/**
+ * Decoupage de la commande initial en sous membres ( token de decoupage '|' )
+ */
 void parse_membres( char* chaine, Cmd* cmd )  // Attention la fonction detruit l'argument chaine
 {
     char* pch;
@@ -141,38 +180,35 @@ void parse_membres( char* chaine, Cmd* cmd )  // Attention la fonction detruit l
 	
 	pch = strtok ( NULL, "|" );
     }
- 
+
     cmd->nb_membres = i;
     cmd->nb_args_membres = (int*)malloc( cmd->nb_membres * sizeof( int ) );  // initialisation du tableau d'entier nb_args_membres
     
     cmd->redir = (char***)malloc( cmd->nb_membres * sizeof( char** ) );
     cmd->type_redir = (int**)malloc( cmd->nb_membres * sizeof( int* ));
-    
-    for( i = 0; i < cmd->nb_membres; i++ )
-    {
-	cmd->redir[i] = (char**)malloc( 3 * sizeof( char* ) );
-	
-	cmd->redir[i][STDIN] = (char*)malloc( 5 * sizeof( char ) );
-	cmd->redir[i][STDOUT] = (char*)malloc( 5 * sizeof( char ) );
-	cmd->redir[i][STDERR] = (char*)malloc( 5 * sizeof( char ) );
-	
-	cmd->redir[i][STDIN] = "NULL";
-	cmd->redir[i][STDOUT] = "NULL";
-	cmd->redir[i][STDERR] = "NULL";
-	
-	cmd->type_redir[i] = (int*)malloc( 3 * sizeof( int ));
-	
-	cmd->type_redir[i][STDIN] = -1;
-	cmd->type_redir[i][STDOUT] = -1;
-	cmd->type_redir[i][STDERR] = -1;
-    }
 }
 
 int parse_redir( unsigned int i, Cmd* cmd )
 {
     char* pch = NULL; 
     int cas = 0;
-  
+
+    cmd->redir[i] = (char**)malloc( 3 * sizeof( char* ) );
+   
+    cmd->redir[i][STDIN] = (char*)malloc( 5 * sizeof( char ) ); 
+    cmd->redir[i][STDOUT] = (char*)malloc( 5 * sizeof( char ) );
+    cmd->redir[i][STDERR] = (char*)malloc( 5 * sizeof( char ) );
+    
+    cmd->redir[i][STDIN] = "NULL";
+    cmd->redir[i][STDOUT] = "NULL";
+    cmd->redir[i][STDERR] = "NULL";
+    
+    cmd->type_redir[i] = (int*)malloc( 3 * sizeof( int ));
+    
+    cmd->type_redir[i][STDIN] = -1;
+    cmd->type_redir[i][STDOUT] = -1;
+    cmd->type_redir[i][STDERR] = -1;
+
     char* copie = (char*)malloc( (strlen(cmd->membres_cmd[i])+1) * sizeof( char ) );
     strcpy( copie, cmd->membres_cmd[i] );
     
@@ -215,6 +251,8 @@ int parse_redir( unsigned int i, Cmd* cmd )
 	//printf( "%d\n", cmd->type_redir[i][STDERR] );
       }
       
+      cas = 0;
+      
       if( strcmp( pch, ">") == 0 )
       {
 	cas = 1;
@@ -239,7 +277,7 @@ int parse_redir( unsigned int i, Cmd* cmd )
       pch = strtok( NULL, " " );
       
     }
-    
+    free( copie );
 }
 
 
