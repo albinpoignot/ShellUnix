@@ -18,7 +18,6 @@ void exec_cmd( Cmd* cmd )
 }
 
 int Pipe[2]; 
-int Pipe2[2];
 
 void process_membres( Cmd* cmd, int i )
 {
@@ -26,74 +25,35 @@ void process_membres( Cmd* cmd, int i )
   
   if( ( fils = fork() ) == 0 )  //fils
   {   
-    printf("Je suis %s\n", cmd->cmd_args[i][0] );
+    //printf("Je suis %s\n", cmd->cmd_args[i][0] );
     
-    if( i % 2 == 0 && i != (cmd->nb_membres - 1) )
+    //*************************** Mise en place des Pipes et Appel recursif *************************************************
+    if( i != 0  ) // Ils redirigent tous leur entrée standard sauf le 1er
     {
-      printf("Je suis %s je crée un pipe 1 \n", cmd->cmd_args[i][0] );
+      //printf("Je suis %s je redirige mon entrée standard\n", cmd->cmd_args[i][0] );
+      close( 0 ); dup( Pipe[0] ); close( Pipe[0] ); close( Pipe[1] );
+    }
+    
+    if( i != (cmd->nb_membres - 1) ) // Ils ont tous besoin d'un pipe sauf le dernier
+    {
+      //printf("Je suis %s je crée un pipe \n", cmd->cmd_args[i][0] );
       pipe( Pipe );
     }
     
-    if( i < (cmd->nb_membres - 1) ) // appel recursif
+    if( i < (cmd->nb_membres - 1) ) // appel recursif !!!!! Equivaut a un Fork attention au contexte !!!!!!
      {
-       printf("Je vais faire un appel recursif je suis %s\n", cmd->cmd_args[i][0]);
+       //printf("Je vais faire un appel recursif je suis %s\n", cmd->cmd_args[i][0]);
        int j = i + 1;
        process_membres( cmd, j );
      }
     
-    if( i % 2 == 0 )
-    {   
-      if(  i != (cmd->nb_membres - 1) )
-      {
-	printf("Je suis %s je redirige ma sortie standard\n", cmd->cmd_args[i][0] );
+     if(  i != (cmd->nb_membres - 1) ) // Ils redirigent tous leur sorties sauf le dernier
+     {
+	//printf("Je suis %s je redirige ma sortie standard\n", cmd->cmd_args[i][0] );
 	close( 1 ); dup( Pipe[1] ); close( Pipe[0] ); close( Pipe[1] );
       }
-    }
-    
-    if( i % 2 == 1  )
-    {
-      printf("Je suis %s je redirige mon entrée standard\n", cmd->cmd_args[i][0] );
-      close( 0 ); dup( Pipe[0] ); close( Pipe[0] ); close( Pipe[1] );
-    }
-     
-     cmd->cmd_args[i] = (char**)realloc( cmd->cmd_args[i], (cmd->nb_args_membres[i] + 1) * sizeof( char*) );
-     cmd->cmd_args[i][ cmd->nb_args_membres[i] ] = NULL; //rajout d'un pointeur NULL dans la liste d'arguements pour execvp
-     
-     execvp( cmd->cmd_args[i][0], cmd->cmd_args[i] );
-  }
-  else
-  {
-	
-    if( i == 0 )
-    {
-      waitpid( fils, NULL, 0 );
-      //close( Pipe[0] ); close( Pipe[1] );
-    }
-  }
-  
- /* if( i > 0 )
-  {
-    //pipe( Pipe ); 
-  }
-  
-  if( ( fils = fork() ) == 0 )  //fils
-  {   
-    printf("fils n°%d sur %d\n", i+1, cmd->nb_membres );
-     //********************* Mise en place des Pipes ************************
-     if( i > 0 )
-     { 
-      //close(0); dup( Pipe[0] ); close( Pipe[0] ); close( Pipe[1] );
-     }
- 
-     //**********************************************************************
-      printf("-Avant test recursif fils %d\n", i+1);
-      if( i < (cmd->nb_membres - 1) ) // appel recursif
-      {
-       i++;
-       process_membres( cmd, i );
-      }
-       printf("-Apres test recursif fils %d\n", i+1);
-     //******************** Redirection standard ****************************
+    //*************************************************************************************************************************
+    //******************** Redirection standard ****************************
      if( strcmp( cmd->redir[i][STDIN], "NULL" ) != 0 )   // redirection entrée standard
      {
        int fichier = open( cmd->redir[i][STDIN], O_RDONLY  );
@@ -135,24 +95,17 @@ void process_membres( Cmd* cmd, int i )
      }
      //**********************************************************************
      //************* Execution **********************************************
-     printf("Avant Execution fils %d\n", i+1 );
+     
      cmd->cmd_args[i] = (char**)realloc( cmd->cmd_args[i], (cmd->nb_args_membres[i] + 1) * sizeof( char*) );
      cmd->cmd_args[i][ cmd->nb_args_membres[i] ] = NULL; //rajout d'un pointeur NULL dans la liste d'arguements pour execvp
      
      execvp( cmd->cmd_args[i][0], cmd->cmd_args[i] );
-     
-     //**********************************************************************
   }
-  else //pere
-  {
-    if( i > 0 )
-    {
-      //close(1); dup( Pipe[1] ); close( Pipe[0] ); close( Pipe[1] );
-    }
-    
-    if( i == 0 )
+  else
+  {	
+    if( i == 0 ) // On attache que le 1er au shell les autres s'attendent via les pipes
     {
       waitpid( fils, NULL, 0 );
     }
-  }*/
+  }
 }
