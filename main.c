@@ -7,8 +7,8 @@
 
 int main( int argc, const char* argv[] )
 {
-  /*while(1)
-  {*/
+  while(1)
+  {
     char* commande; 
     int i = 0;
     Cmd* cmd = (Cmd*)malloc( 1 * sizeof( Cmd ) );
@@ -40,5 +40,5 @@ int main( int argc, const char* argv[] )
     free( commande );
     free( cmd );
     
-  //}                                      
+  }                                      
 }

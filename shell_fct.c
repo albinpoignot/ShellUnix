@@ -61,7 +61,8 @@ void process_membres( Cmd* cmd, int i )
        dup( fichier );
        close( fichier );
      }
-     else if( strcmp( cmd->redir[i][STDOUT], "NULL" ) != 0 ) // redirection sortie standard
+     
+     if( strcmp( cmd->redir[i][STDOUT], "NULL" ) != 0 ) // redirection sortie standard
      {
        int fichier;
        if( cmd->type_redir[i][STDOUT] == RAPPEND )          //en mode ajout
@@ -77,7 +78,8 @@ void process_membres( Cmd* cmd, int i )
        dup( fichier );
        close( fichier );
      }
-     else if( strcmp( cmd->redir[i][STDERR], "NULL" ) != 0 )  // redirection sortie d'erreur standard
+     
+     if( strcmp( cmd->redir[i][STDERR], "NULL" ) != 0 )  // redirection sortie d'erreur standard
      {
        int fichier;
        if( cmd->type_redir[i][STDERR] == RAPPEND )            // en mode ajout
