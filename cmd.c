@@ -116,9 +116,9 @@ void free_args( Cmd* c )
  */
 void parse_args( Cmd * c )
 {
-	char * pch;
+  char* pch;
 	int i;
-
+  
 	c->cmd_args = (char***)malloc( c->nb_membres * sizeof( char** ) );
 
 	for( i = 0; i < c->nb_membres; i++ )
@@ -140,22 +140,22 @@ void parse_args( Cmd * c )
 			// on analyse pas si il y a redirection : cela sera fait dans parse_redir()
 			if( strcmp( pch, ">") != 0 && strcmp( pch, "<") != 0 && strcmp( pch, ">>") != 0 && strcmp( pch, "2>>") != 0 && strcmp( pch, "2>") != 0 )
 			{
-				c->cmd_args[i][j] = (char*)malloc( (strlen( pch) + 1 ) * sizeof( char ) );
-				strcpy( c->cmd_args[i][j], pch );
+		c->cmd_args[i][j] = (char*)malloc( (strlen( pch) + 1 ) * sizeof( char ) );
+		strcpy( c->cmd_args[i][j], pch );
 
-				pch = strtok (NULL, " ");
-				j++;
+		pch = strtok (NULL, " ");
+		j++;
 
-				if( pch != NULL )
-				{
-					c->cmd_args[i] = (char**)realloc( c->cmd_args[i], (j+1) * sizeof( char* ) );
-				}
+		if( pch != NULL )
+		{
+			c->cmd_args[i] = (char**)realloc( c->cmd_args[i], (j+1) * sizeof( char* ) );
+		}
 			}
 			else
 			{
 				// On saute une analyse puisque c'est une redirection
-				pch = strtok (NULL, " ");
-				pch = strtok (NULL, " ");
+		pch = strtok (NULL, " ");
+		pch = strtok (NULL, " ");
 			}
 		}
 		
@@ -177,10 +177,21 @@ void parse_membres( char* chaine, Cmd* cmd )  // Attention la fonction detruit l
     //     Récupération de la commande initiale
     cmd->initial_cmd = (char*)malloc( (strlen(chaine)+1) * sizeof( char ) ); //Allocation de la chaine initial_cmd de la structure CMD    
     strcpy( cmd->initial_cmd, chaine ) ;                                 //Copie de la commande initiale dans la structure
-	
-	// STEP 2 :
-	//     Récupération des différents membres de la commande initiale
-    pch = strtok ( chaine, "|" );	// Découpe la chaine selon les " | "
+
+    // STEP 2 :
+    //     Récupération des différents membres de la commande initiale
+    if( (pch = strrchr( cmd->initial_cmd, '&')) != NULL && *pch == cmd->initial_cmd[strlen(cmd->initial_cmd)-1] )
+	{
+		cmd->initial_cmd[strlen(cmd->initial_cmd)-1] = ' ';
+		chaine[strlen(chaine)-1] = ' ';
+		cmd->attendreRetour = 0;
+	}
+	else
+	{
+		cmd->attendreRetour = 1;
+	}
+   
+    pch = strtok ( chaine, "|" );
 
     cmd->membres_cmd = (char**)malloc( sizeof( char* )) ;
     
@@ -191,7 +202,7 @@ void parse_membres( char* chaine, Cmd* cmd )  // Attention la fonction detruit l
 		cmd->membres_cmd = (char**)realloc( cmd->membres_cmd, i * sizeof( char* ));
 		cmd->membres_cmd[i-1] = (char*)malloc( (strlen( pch )+1) * sizeof( char ));
 		strcpy( cmd->membres_cmd[i-1], pch );
-			
+		
 		pch = strtok ( NULL, "|" ); // Récupération de la prochaine sous-partie
     }
 
@@ -243,60 +254,60 @@ int parse_redir( unsigned int i, Cmd* cmd )
 	{
 		if( cas == 1 )
 		{
-			cmd->redir[i][STDOUT] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
-			strcpy( cmd->redir[i][STDOUT], pch );
-			//printf( "Redirection sortie standard .%s.\n", cmd->redir[i][STDOUT] );
+		cmd->redir[i][STDOUT] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
+		strcpy( cmd->redir[i][STDOUT], pch );
+		//printf( "Redirection sortie standard .%s.\n", cmd->redir[i][STDOUT] );
 		}
 		else if( cas == 2 )
 		{
-			cmd->redir[i][STDIN] = (char*)malloc( (strlen(pch)+1) * sizeof( char ) );
-			strcpy( cmd->redir[i][STDIN], pch );
-			//printf( "Redirection entrée standard .%s.\n", cmd->redir[i][STDIN] );
+		cmd->redir[i][STDIN] = (char*)malloc( (strlen(pch)+1) * sizeof( char ) );
+		strcpy( cmd->redir[i][STDIN], pch );
+		//printf( "Redirection entrée standard .%s.\n", cmd->redir[i][STDIN] );
 		}
 		else if( cas == 3 )
 		{
-			cmd->redir[i][STDOUT] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
-			strcpy( cmd->redir[i][STDOUT], pch );
-			cmd->type_redir[i][STDOUT] = RAPPEND;
-			//printf( "Redirection et append sortie standard .%s.\n", cmd->redir[i][STDOUT] );
-			//printf( "%d\n", cmd->type_redir[i][STDOUT] );
+		cmd->redir[i][STDOUT] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
+		strcpy( cmd->redir[i][STDOUT], pch );
+		cmd->type_redir[i][STDOUT] = RAPPEND;
+		//printf( "Redirection et append sortie standard .%s.\n", cmd->redir[i][STDOUT] );
+		//printf( "%d\n", cmd->type_redir[i][STDOUT] );
 		}
 		else if( cas == 4 )
 		{
-			cmd->redir[i][STDERR] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
-			strcpy( cmd->redir[i][STDERR], pch );
-			//printf( "Redirection erreur standard .%s.\n", cmd->redir[i][STDERR] );
+		cmd->redir[i][STDERR] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
+		strcpy( cmd->redir[i][STDERR], pch );
+		//printf( "Redirection erreur standard .%s.\n", cmd->redir[i][STDERR] );
 		}
 		else if( cas == 5 )
 		{
-			cmd->redir[i][STDERR] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
-			strcpy( cmd->redir[i][STDERR], pch );
-			cmd->type_redir[i][STDERR] = RAPPEND;
-			//printf( "Redirection et append erreur standard .%s.\n", cmd->redir[i][STDERR] );
-			//printf( "%d\n", cmd->type_redir[i][STDERR] );
+		cmd->redir[i][STDERR] = (char*)malloc( (strlen( pch )+1) * sizeof( char ) );
+		strcpy( cmd->redir[i][STDERR], pch );
+		cmd->type_redir[i][STDERR] = RAPPEND;
+		//printf( "Redirection et append erreur standard .%s.\n", cmd->redir[i][STDERR] );
+		//printf( "%d\n", cmd->type_redir[i][STDERR] );
 		}
 
 		cas = 0;
 
 		if( strcmp( pch, ">") == 0 )
 		{
-			cas = 1;
+		cas = 1;
 		}
 		else if( strcmp( pch, "<") == 0 )
 		{
-			cas = 2;
+		cas = 2;
 		}
 		else if( strcmp( pch, ">>") == 0 )
 		{
-			cas = 3;
+		cas = 3;
 		}
 		else if( strcmp( pch, "2>") == 0 )
 		{
-			cas = 4;
+		cas = 4;
 		}
 		else if( strcmp( pch, "2>>") == 0 )
 		{
-			cas = 5;
+		cas = 5;
 		}
 
 		pch = strtok( NULL, " " );

@@ -14,6 +14,7 @@ typedef struct
   unsigned int *nb_args_membres; // Nombre d'argements par membre
   char ***redir; // Stocke les chemins vers les fichiers de redirection
   int **type_redir; // Stocke le sens des redirections
+  int attendreRetour; // booleen indiquant sur il faut reprendre la main de suite
   
 } Cmd;
 

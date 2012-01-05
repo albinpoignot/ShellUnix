@@ -26,18 +26,18 @@ int main( int argc, const char* argv[] )
 		}
 
 		// On exécute les commandes
-		//exec_cmd( cmd );
+		exec_cmd( cmd );
 
 		// ******************************************
 		// DEBUG : affichage de la structure
 		// ******************************************
-		aff_membres( cmd );
+		/*aff_membres( cmd );
 		aff_args( cmd );
 
 		for( i = 0; i < cmd->nb_membres; i++ )
 		{
 			aff_redir( cmd, i );
-		}
+		}*/
 		
 		// Libération des ressources
 		free_redir( cmd );
