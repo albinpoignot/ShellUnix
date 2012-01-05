@@ -105,7 +105,7 @@ void process_membres( Cmd* cmd, int i )
   }
   else
   {	
-    if( i == 0 ) // On attache que le 1er au shell les autres s'attendent via les pipes
+    if( i == 0 && cmd->attendreRetour == 1) // On attache que le 1er au shell les autres s'attendent via les pipes
     {
       waitpid( fils, NULL, 0 );
     }
