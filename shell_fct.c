@@ -10,16 +10,16 @@
 
 #include "cmd.h"
 
-void process_membres( Cmd* cmd, int i );
+int process_membres( Cmd* cmd, int i );
 
-void exec_cmd( Cmd* cmd )
+int exec_cmd( Cmd* cmd )
 {
-  process_membres( cmd, 0 ); 
+	return process_membres( cmd, 0 ); 
 }
 
 int Pipe[2]; 
 
-void process_membres( Cmd* cmd, int i )
+int process_membres( Cmd* cmd, int i )
 {
   pid_t fils;
   
@@ -67,11 +67,11 @@ void process_membres( Cmd* cmd, int i )
        int fichier;
        if( cmd->type_redir[i][STDOUT] == RAPPEND )          //en mode ajout
        {
-	 fichier = open( cmd->redir[i][STDOUT], O_RDWR | O_APPEND );
+			fichier = open( cmd->redir[i][STDOUT], O_RDWR | O_APPEND );
        }
        else                                                 //en mode normal
        {
-	 fichier = open( cmd->redir[i][STDOUT], O_WRONLY | O_CREAT, 0777 );
+			fichier = open( cmd->redir[i][STDOUT], O_WRONLY | O_CREAT, 0777 );
        }
        
        close( 1 );
@@ -84,7 +84,7 @@ void process_membres( Cmd* cmd, int i )
        int fichier;
        if( cmd->type_redir[i][STDERR] == RAPPEND )            // en mode ajout
        {
-	 fichier = open( cmd->redir[i][STDERR],  O_RDWR | O_APPEND );
+			fichier = open( cmd->redir[i][STDERR],  O_RDWR | O_APPEND );
        }
        else                                                   // en mode normal
        {
@@ -105,9 +105,12 @@ void process_membres( Cmd* cmd, int i )
   }
   else
   {	
-    if( i == 0 && cmd->attendreRetour == 1) // On attache que le 1er au shell les autres s'attendent via les pipes
+    if( i == 0 && cmd->attendreRetour == 1 ) // On attache que le 1er au shell les autres s'attendent via les pipes
     {
-      waitpid( fils, NULL, 0 );
+		int status;
+		waitpid( fils, &status, 0 );
+		
+		return WIFEXITED(status);
     }
   }
 }

@@ -158,26 +158,34 @@ void parse_args( Cmd * c )
 /**
  * Decoupage de la commande initial en sous membres ( token de decoupage '|' )
  */
-void parse_membres( char* chaine, Cmd* cmd )  // Attention la fonction detruit l'argument chaine
+void parse_membres( const char* chaine, Cmd* cmd )  // Attention la fonction detruit l'argument chaine
 {
-    char* pch;
+    char* pch = NULL;
+	char* lol = NULL;
     int i = 0;
     
     cmd->initial_cmd = (char*)malloc( (strlen(chaine)+1) * sizeof( char ) ); //Allocation de la chaine initial_cmd de la structure CMD    
-    strcpy( cmd->initial_cmd, chaine ) ;                                 //Copie de la commande initial dans la structure
+    strcpy( cmd->initial_cmd, chaine ) ;                                     //Copie de la commande initial dans la structure
     
-    if( (pch = strrchr( cmd->initial_cmd, '&')) != NULL && *pch == cmd->initial_cmd[strlen(cmd->initial_cmd)-1] )
+    if( (lol = strrchr( cmd->initial_cmd, '&')) != NULL )
 	{
-		cmd->initial_cmd[strlen(cmd->initial_cmd)-1] = ' ';
-		chaine[strlen(chaine)-1] = ' ';
-		cmd->attendreRetour = 0;
+		if( *lol == cmd->initial_cmd[strlen(cmd->initial_cmd)-1] )
+		{
+			cmd->initial_cmd[strlen(cmd->initial_cmd)-1] = ' ';
+			//chaine[strlen(chaine)-1] = ' ';
+			cmd->attendreRetour = 0;
+		}
 	}
 	else
 	{
 		cmd->attendreRetour = 1;
 	}
    
-    pch = strtok ( chaine, "|" );
+    char* copie = NULL;
+    copie = (char*)malloc( ( strlen( cmd->initial_cmd ) + 1 ) * sizeof( char ) );
+    strcpy( copie, cmd->initial_cmd ) ; 
+	
+    pch = strtok ( copie, "|" );
 
     cmd->membres_cmd = (char**)malloc( sizeof( char* )) ;
     
@@ -197,6 +205,7 @@ void parse_membres( char* chaine, Cmd* cmd )  // Attention la fonction detruit l
     
     cmd->redir = (char***)malloc( cmd->nb_membres * sizeof( char** ) );
     cmd->type_redir = (int**)malloc( cmd->nb_membres * sizeof( int* ));
+	free( copie );
 }
 
 int parse_redir( unsigned int i, Cmd* cmd )
