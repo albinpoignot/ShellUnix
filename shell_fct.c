@@ -28,30 +28,31 @@ int process_membres( Cmd* cmd, int i )
     //printf("Je suis %s\n", cmd->cmd_args[i][0] );
     
     //*************************** Mise en place des Pipes et Appel recursif *************************************************
-    if( i != 0  ) // Ils redirigent tous leur entrée standard sauf le 1er
-    {
-      //printf("Je suis %s je redirige mon entrée standard\n", cmd->cmd_args[i][0] );
-      close( 0 ); dup( Pipe[0] ); close( Pipe[0] ); close( Pipe[1] );
-    }
-    
+   
     if( i != (cmd->nb_membres - 1) ) // Ils ont tous besoin d'un pipe sauf le dernier
     {
       //printf("Je suis %s je crée un pipe \n", cmd->cmd_args[i][0] );
       pipe( Pipe );
     }
     
-    if( i < (cmd->nb_membres - 1) ) // appel recursif !!!!! Equivaut a un Fork attention au contexte !!!!!!
-     {
+	if( i < (cmd->nb_membres - 1) ) // appel recursif !!!!! Equivaut a un Fork attention au contexte !!!!!!
+    {
        //printf("Je vais faire un appel recursif je suis %s\n", cmd->cmd_args[i][0]);
        int j = i + 1;
        process_membres( cmd, j );
-     }
+    }
     
-     if(  i != (cmd->nb_membres - 1) ) // Ils redirigent tous leur sorties sauf le dernier
-     {
-	//printf("Je suis %s je redirige ma sortie standard\n", cmd->cmd_args[i][0] );
-	close( 1 ); dup( Pipe[1] ); close( Pipe[0] ); close( Pipe[1] );
-      }
+    if( i != 0  ) // Ils redirigent tous leur entrée standard sauf le 1er
+    {
+       //printf("Je suis %s je redirige mon entrée standard\n", cmd->cmd_args[i][0] );
+       close( 0 ); dup( Pipe[0] ); close( Pipe[0] ); close( Pipe[1] );
+	}
+   
+    if(  i != (cmd->nb_membres - 1) ) // Ils redirigent tous leur sorties sauf le dernier
+    {
+		//printf("Je suis %s je redirige ma sortie standard\n", cmd->cmd_args[i][0] );
+		close( 1 ); dup( Pipe[1] ); close( Pipe[0] ); close( Pipe[1] );
+     }
     //*************************************************************************************************************************
     //******************** Redirection standard ****************************
      if( strcmp( cmd->redir[i][STDIN], "NULL" ) != 0 )   // redirection entrée standard
@@ -112,5 +113,6 @@ int process_membres( Cmd* cmd, int i )
 		
 		return WIFEXITED(status);
     }
+
   }
 }

@@ -21,7 +21,7 @@ typedef struct
 void aff_args( Cmd* c ); // ToDo
 void free_args( Cmd* c ); // ToDo
 void parse_args( Cmd* c );
-void parse_membres( const char* chaine, Cmd* ma_cmd ); 
+void parse_membres(const char* chaine, Cmd* ma_cmd ); 
 void aff_membres( Cmd* ma_cmd ); // ToDo
 void free_membres( Cmd* ma_cmd ); // ToDo
 int parse_redir( unsigned int i, Cmd* cmd ); 

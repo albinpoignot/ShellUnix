@@ -8,12 +8,12 @@
 #define ET 0
 #define OU 1
 
-void redirection( Cmd** tabCmd, int** tabEtOu, char* pointeurET, char** depart, int *j, int mode);
+void redirection( Cmd*** tabCmd, int** tabEtOu, char** pointeurET, char** depart, int *j, int mode);
 
 int main( int argc, const char* argv[] )
 {
-  //while(1)
-  //{
+  while(1)
+  {
     char* commande = NULL; 
 	char* copieCommande = NULL;
     int i = 0, j = 0, exited = -1;;
@@ -51,36 +51,32 @@ int main( int argc, const char* argv[] )
 				//printf("ET et OU present\n");
 				if( pointeurET < pointeurOU )
 				{
-					redirection( tabCmd, &tabEtOu, pointeurET, &depart, &j, ET );
-					redirection( tabCmd, &tabEtOu, pointeurOU, &depart, &j, OU );
+					redirection( &tabCmd, &tabEtOu, &pointeurET, &depart, &j, ET );
+					redirection( &tabCmd, &tabEtOu, &pointeurOU, &depart, &j, OU );
 				}
 				else if( pointeurET > pointeurOU )
 				{
-					redirection( tabCmd, &tabEtOu, pointeurOU, &depart, &j, OU );
-					redirection( tabCmd, &tabEtOu, pointeurET, &depart, &j, ET );
+					redirection( &tabCmd, &tabEtOu, &pointeurOU, &depart, &j, OU );
+					redirection( &tabCmd, &tabEtOu, &pointeurET, &depart, &j, ET );
 				} 
 			}
 			else if( pointeurET != NULL )
 			{
-				//printf("ET seul\n");
-				redirection( tabCmd, &tabEtOu, pointeurET, &depart, &j, ET );
+				//printf("ET seul %s\n", depart);
+				redirection( &tabCmd, &tabEtOu, &pointeurET, &depart, &j, ET );
 			}
 			else if( pointeurOU != NULL )
 			{
 				//printf("OU seul\n");
-				redirection( tabCmd, &tabEtOu, pointeurOU, &depart, &j, OU );
+				redirection( &tabCmd, &tabEtOu, &pointeurOU, &depart, &j, OU );
 			}
 			
-			if( pointeurET != NULL )
-			{
-				saveET = pointeurET+3;
-			}
-			if( pointeurOU != NULL )
-			{
-				saveOU = pointeurOU+3;
-				//printf(" depart :%s. - saveOU :%s\n", depart, saveOU );
-			}
+			//printf(" depart :%s. - saveOU :%s\n", depart, saveOU );
 			
+			saveET = pointeurET;
+			saveOU = pointeurOU;
+			
+			//printf( "depart avant test : .%s. et j : %d\n", depart, j );
 			pointeurET = strstr( depart, "&&");
 			pointeurOU = strstr( depart, "||");
 		}
@@ -100,6 +96,7 @@ int main( int argc, const char* argv[] )
 				pointeurDernier = saveOU;
 			}
 			
+			
 			int i = 0;
 			tabCmd = (Cmd**)realloc( tabCmd, (j+1) * sizeof( Cmd* ) );
 			tabCmd[j] = (Cmd*)malloc( 1 * sizeof( Cmd ) );
@@ -118,15 +115,16 @@ int main( int argc, const char* argv[] )
 			j++;
 			free( chaine );
 		}
-
+		
 		i = 0;
 		
 		while( i < j )
 		{
-			printf(" %s\n", tabCmd[i]->initial_cmd );
+			
+			//printf(" %s\n", tabCmd[i]->initial_cmd );
 			int correctementExe = exec_cmd( tabCmd[i] );
-			printf( "retour : %d  special : %d\n", correctementExe, tabEtOu[i] );
-			if( (correctementExe == 1 && tabEtOu[i] == ET) || ( correctementExe == -1 && tabEtOu[i] == OU) )
+			//printf( "retour : %d  special : %d\n", correctementExe, tabEtOu[i] );
+			if( (correctementExe != -1 && tabEtOu[i] == ET) || ( correctementExe == -1 && tabEtOu[i] == OU) )
 			{
 				i++;   //On passe au suivant
 			}
@@ -159,45 +157,51 @@ int main( int argc, const char* argv[] )
 			parse_redir( i, cmd );
 		}
 		
-		exited = exec_cmd( cmd );
-		
+		exec_cmd( cmd );
+
 		free_redir( cmd );
 		free_args( cmd );
 		free_membres( cmd );
-
 		free( cmd );
 	}
 	
 	free( commande );
 	free( copieCommande );
 	
-  //}                                      
+  }                                      
 }
 
-void redirection( Cmd** tabCmd, int** tabEtOu, char* pointeurET, char** depart, int* j, int mode)
+void redirection( Cmd*** tabCmd, int** tabEtOu, char** pointeurET, char** depart, int* j, int mode)
 {
 	int i = 0;
 	char* chaine = NULL;
+	
+	//printf("depart : .%s.\n", *depart );
+	
+	chaine = (char*)malloc( ((*pointeurET) - (*depart) + 1 ) * sizeof( char ) );
+	strncpy( chaine, *depart, ((*pointeurET) - (*depart)) );
 
-	tabCmd = (Cmd**)realloc( tabCmd, ((*j)+1) * sizeof( Cmd* ) );
-	tabCmd[(*j)] = (Cmd*)malloc( 1 * sizeof( Cmd ) );
+	//printf("chaine : .%s.\n", chaine );
+	
+	(*tabCmd) = (Cmd**)realloc( (*tabCmd), ((*j)+1) * sizeof( Cmd* ) );
+	(*tabCmd)[(*j)] = (Cmd*)malloc( 1 * sizeof( Cmd ) );
 	
 	*tabEtOu = (int*)realloc( *tabEtOu, ((*j)+1) * sizeof( int ) );
 	*tabEtOu[(*j)] = mode;
-	 
-	chaine = (char*)malloc( (pointeurET - *depart + 1 ) * sizeof( char ) );
-	strncpy( chaine, *depart, (pointeurET - *depart) );
-
-	parse_membres( chaine, tabCmd[*j] );
-	parse_args( tabCmd[*j] ); 
 	
-	for( i = 0; i < (tabCmd[*j])->nb_membres; i++ )
+	parse_membres( chaine, (*tabCmd)[*j] );
+	parse_args( (*tabCmd)[*j] ); 
+	
+	for( i = 0; i < ((*tabCmd)[*j])->nb_membres; i++ )
 	{
-		parse_redir( i, tabCmd[*j] );
+		//printf("parse_redir : .%d. .%s.\n", i, (*tabCmd[*j])->initial_cmd ); 
+		parse_redir( i, (*tabCmd)[*j] );
 	}
 	
 	(*j)++;
-	pointeurET += 3;
-	*depart = pointeurET;  
+	(*pointeurET) += 3;
+	*depart = (*pointeurET);  
 	free( chaine );
-}
+}                                      
+
+
